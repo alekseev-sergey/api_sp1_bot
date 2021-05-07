@@ -21,14 +21,17 @@ TELEGRAM_TOKEN = os.getenv('TELEGRAM_TOKEN')
 CHAT_ID = os.getenv('TELEGRAM_CHAT_ID')
 API_URL = 'https://praktikum.yandex.ru/api/user_api/'
 
+bot = telegram.Bot(token=TELEGRAM_TOKEN)
+
 
 def parse_homework_status(homework):
-    """Получение статуса домашней работы"""
+    """Парсинг статуса домашней работы"""
     homework_name = homework.get('homework_name')
     homework_status = homework.get('status')
 
     if homework_name is None or homework_status is None:
         message = 'Не удалось получить данные.'
+        logging.error(message)
         return message
 
     if homework_status == 'rejected':
@@ -39,13 +42,15 @@ def parse_homework_status(homework):
     elif homework_status == 'reviewing':
         verdict = 'Работа взята в ревью.'
     else:
-        message = (f'У работы "{homework_name}" неизвестный статус.')
+        message = (f'У работы "{homework_name}" неизвестный '
+                   f'статус {homework_status}.')
+        logging.error(message)
         return message
     return f'У вас проверили работу "{homework_name}"!\n\n{verdict}'
 
 
 def get_homework_statuses(current_timestamp):
-    """Получение результа домашней работы"""
+    """Обращение к API сервиса Практикум.Домашка"""
     params = {'from_date': current_timestamp, }
     headers = {'Authorization': f'OAuth {PRAKTIKUM_TOKEN}', }
 
@@ -57,6 +62,7 @@ def get_homework_statuses(current_timestamp):
     except Exception as e:
         message = f'Не удалось получить данные. Возникла ошибка: {e}.'
         logging.error(message)
+        send_message(message, bot)
 
     return {}
 
@@ -69,7 +75,6 @@ def send_message(message, bot_client):
 
 def main():
     """Запуск бота"""
-    bot = telegram.Bot(token=TELEGRAM_TOKEN)
     logging.debug('Бот запущен.')
     timestamp = int(time.time())
 
