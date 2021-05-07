@@ -23,6 +23,7 @@ API_URL = 'https://praktikum.yandex.ru/api/user_api/'
 
 
 def parse_homework_status(homework):
+    """Получение статуса домашней работы"""
     homework_name = homework.get('homework_name')
     homework_status = homework.get('status')
 
@@ -40,13 +41,13 @@ def parse_homework_status(homework):
     else:
         message = (f'У работы "{homework_name}" неизвестный статус.')
         return message
-
     return f'У вас проверили работу "{homework_name}"!\n\n{verdict}'
 
 
-def get_homework_statuses(current_timestamp: int) -> dict:
+def get_homework_statuses(current_timestamp):
+    """Получение результа домашней работы"""
     params = {'from_date': current_timestamp, }
-    headers = {'Authorization': f'OAuth {PRAKTIKUM_TOKEN}',}
+    headers = {'Authorization': f'OAuth {PRAKTIKUM_TOKEN}', }
 
     try:
         api_url = f'{API_URL}homework_statuses/'
@@ -60,12 +61,14 @@ def get_homework_statuses(current_timestamp: int) -> dict:
     return {}
 
 
-def send_message(message: str, bot_client):
+def send_message(message, bot_client):
+    """Отправка сообщения пользователю"""
     logging.info('Сообщение отправлено')
     return bot_client.send_message(CHAT_ID, message)
 
 
 def main():
+    """Запуск бота"""
     bot = telegram.Bot(token=TELEGRAM_TOKEN)
     logging.debug('Бот запущен.')
     timestamp = int(time.time())
